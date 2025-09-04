@@ -15,40 +15,38 @@ const Menu = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const menuItems = [
-    {
-      id: 1,
-      name: "Avocado Toast Supreme",
-      description: "Fresh avocado on artisan bread with poached egg",
-      price: 180,
-      image: avocadoToastImage,
-      category: "breakfast",
-      rating: 4.8,
-      isPopular: true,
-      tags: ["healthy", "vegetarian"],
-    },
-    {
-      id: 2,
-      name: "Comfort Khichuri Bowl",
-      description: "Traditional Bengali comfort food with lentils and rice",
-      price: 140,
-      image: khichuriImage,
-      category: "snacks",
-      rating: 4.6,
-      isPopular: false,
-      tags: ["comfort", "vegetarian"],
-    },
-    {
-      id: 3,
-      name: "Special Biryani",
-      description: "Aromatic basmati rice with tender meat and spices",
-      price: 280,
-      image: biryaniImage,
-      category: "cafe",
-      rating: 4.9,
-      isPopular: true,
-      tags: ["spicy", "non-vegetarian", "pre-order"],
-      preOrder: true,
-    },
+    // Breakfast Items
+    { id: 1, name: "Paratha", description: "Traditional flatbread, freshly made", price: 10, image: khichuriImage, category: "breakfast", rating: 4.5, isPopular: true, per: "pc" },
+    { id: 2, name: "Vegetable Curry", description: "Fresh mixed vegetables in aromatic spices", price: 10, image: avocadoToastImage, category: "breakfast", rating: 4.3, isPopular: false },
+    { id: 3, name: "Lentil (Dal)", description: "Yellow lentils cooked to perfection", price: 10, image: khichuriImage, category: "breakfast", rating: 4.4, isPopular: false },
+    { id: 4, name: "Special Moong Dal", description: "Premium moong lentils with special spices", price: 20, image: khichuriImage, category: "breakfast", rating: 4.6, isPopular: true },
+    { id: 5, name: "Vuna Khichuri", description: "Traditional rice and lentil dish with pickle/mash", price: 30, image: khichuriImage, category: "breakfast", rating: 4.8, isPopular: true },
+    { id: 6, name: "Biryani (Half)", description: "Aromatic basmati rice with tender meat", price: 50, image: biryaniImage, category: "breakfast", rating: 4.9, isPopular: true, preOrder: true },
+    { id: 7, name: "Biryani (Full)", description: "Full portion of aromatic basmati rice with meat", price: 90, image: biryaniImage, category: "breakfast", rating: 4.9, isPopular: true, preOrder: true },
+    { id: 8, name: "Fried Egg", description: "Perfectly fried egg with golden yolk", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.2, isPopular: false },
+    { id: 9, name: "Omelet", description: "Fluffy omelet made with fresh eggs", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.3, isPopular: false },
+    { id: 10, name: "Boiled Egg", description: "Soft or hard boiled egg", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.1, isPopular: false },
+
+    // Snacks Items
+    { id: 11, name: "Singara", description: "Triangular pastry with savory filling", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.4, isPopular: true, per: "pc" },
+    { id: 12, name: "Samucha", description: "Crispy pastry with spiced potato filling", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.3, isPopular: true, per: "pc" },
+    { id: 13, name: "Egg Chop", description: "Fried egg wrapped in crispy coating", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.5, isPopular: false, per: "pc" },
+    { id: 14, name: "Puri", description: "Deep-fried bread, light and crispy", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.2, isPopular: false, per: "pc" },
+    { id: 15, name: "Aloo Chop", description: "Spiced potato fritters", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.0, isPopular: true, per: "pc" },
+    { id: 16, name: "Beguni", description: "Sliced eggplant in crispy batter", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.1, isPopular: false, per: "pc" },
+    { id: 17, name: "Pakora", description: "Mixed vegetable fritters", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.2, isPopular: false, per: "pc" },
+
+    // Coffee & Tea Items
+    { id: 18, name: "Nescafé Sweet Coffee", description: "Premium instant coffee, perfectly sweetened", price: 30, image: khichuriImage, category: "cafe", rating: 4.5, isPopular: true },
+    { id: 19, name: "Nescafé Special Coffee", description: "Premium blend with special preparation", price: 40, image: khichuriImage, category: "cafe", rating: 4.7, isPopular: true },
+    { id: 20, name: "Sugar-Free Coffee", description: "Great taste without the sugar", price: 30, image: khichuriImage, category: "cafe", rating: 4.3, isPopular: false },
+    { id: 21, name: "Standard Coffee", description: "Classic coffee for everyday enjoyment", price: 20, image: khichuriImage, category: "cafe", rating: 4.1, isPopular: true },
+    { id: 22, name: "Black Coffee", description: "Pure coffee without milk or sugar", price: 30, image: khichuriImage, category: "cafe", rating: 4.4, isPopular: false },
+    { id: 23, name: "Green Tea", description: "Healthy and refreshing green tea", price: 15, image: khichuriImage, category: "cafe", rating: 4.2, isPopular: false },
+    { id: 24, name: "Milk Tea", description: "Traditional tea with milk", price: 10, image: khichuriImage, category: "cafe", rating: 4.3, isPopular: true },
+    { id: 25, name: "Special Milk Tea", description: "Premium milk tea with special blend", price: 20, image: khichuriImage, category: "cafe", rating: 4.6, isPopular: true },
+    { id: 26, name: "Masala Tea", description: "Spiced tea with aromatic herbs", price: 10, image: khichuriImage, category: "cafe", rating: 4.4, isPopular: true },
+    { id: 27, name: "Malai Tea", description: "Rich creamy tea with malai", price: 20, image: khichuriImage, category: "cafe", rating: 4.5, isPopular: false }
   ];
 
   const categories = [
@@ -166,7 +164,9 @@ const Menu = () => {
                       {item.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-primary">₹{item.price}</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {item.price} tk{item.per && `/${item.per}`}
+                      </span>
                       <Button className="bg-primary hover:bg-primary/90">
                         <Plus className="w-4 h-4 mr-1" />
                         Add
@@ -204,7 +204,9 @@ const Menu = () => {
                         {item.description}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-primary">₹{item.price}</span>
+                        <span className="text-xl font-bold text-primary">
+                          {item.price} tk{item.per && `/${item.per}`}
+                        </span>
                         <Button size="sm" className="bg-primary hover:bg-primary/90">
                           <Plus className="w-3 h-3 mr-1" />
                           Add
