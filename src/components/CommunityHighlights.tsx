@@ -47,6 +47,7 @@ const CommunityHighlights = () => {
               transition={{ delay: index * 0.1 }}
             >
               <Card className="community-post">
+                <CardContent className="p-4">
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
                     <span className="text-primary-foreground font-semibold">
@@ -81,6 +82,7 @@ const CommunityHighlights = () => {
                     </div>
                   </div>
                 </div>
+                </CardContent>
               </Card>
             </motion.div>
           ))}
