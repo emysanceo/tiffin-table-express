@@ -9,6 +9,7 @@ import Menu from "./pages/Menu";
 import Community from "./pages/Community";
 import Box from "./pages/Box";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -18,15 +19,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/box" element={<Box />} />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/*" element={
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/menu" element={<Menu />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/box" element={<Box />} />
+                <Route path="/profile" element={<Profile />} />
+              </Routes>
+            </Layout>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
