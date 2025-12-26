@@ -8,45 +8,47 @@
 
 @layer base {
   :root {
-    /* Tiffin Table Brand Colors */
-    --background: 32 15% 8%;        /* #181812 - dark cozy */
-    --foreground: 45 96% 89%;       /* Light text on dark bg */
+    /* Tiffin Table Brand Colors - Enhanced Warm Palette */
+    --background: 30 20% 6%;         /* Deep warm black */
+    --foreground: 40 50% 95%;        /* Warm white text */
     
-    --primary: 37 96% 55%;          /* #fea316 - highlight orange */
-    --primary-foreground: 32 15% 8%;
+    --primary: 32 95% 52%;           /* Vibrant saffron orange */
+    --primary-foreground: 30 20% 6%;
     
-    --secondary: 183 82% 78%;       /* #aef5f8 - accent blue */
-    --secondary-foreground: 32 15% 8%;
+    --secondary: 160 60% 45%;        /* Fresh mint green */
+    --secondary-foreground: 30 20% 6%;
     
-    --accent: 183 82% 78%;          /* #aef5f8 - accent blue */
-    --accent-foreground: 32 15% 8%;
+    --accent: 45 90% 60%;            /* Golden yellow */
+    --accent-foreground: 30 20% 6%;
     
-    --destructive: 359 82% 59%;     /* #e73437 - alert red */
-    --destructive-foreground: 45 96% 89%;
+    --destructive: 0 75% 55%;        /* Warm red */
+    --destructive-foreground: 40 50% 95%;
     
-    --muted: 32 15% 15%;            /* Darker muted */
-    --muted-foreground: 45 20% 65%;
+    --muted: 30 15% 12%;             /* Warm dark muted */
+    --muted-foreground: 35 20% 60%;
     
-    --card: 32 15% 12%;             /* Card background */
-    --card-foreground: 45 96% 89%;
+    --card: 30 18% 10%;              /* Warm card background */
+    --card-foreground: 40 50% 95%;
     
-    --popover: 32 15% 12%;
-    --popover-foreground: 45 96% 89%;
+    --popover: 30 18% 10%;
+    --popover-foreground: 40 50% 95%;
     
-    --border: 32 15% 20%;
-    --input: 32 15% 15%;
-    --ring: 37 96% 55%;
+    --border: 30 15% 18%;
+    --input: 30 15% 14%;
+    --ring: 32 95% 52%;
     
     /* Custom Design Tokens */
-    --hero-gradient: linear-gradient(135deg, hsl(32 15% 8%) 0%, hsl(32 15% 12%) 100%);
-    --cta-gradient: linear-gradient(135deg, hsl(37 96% 55%) 0%, hsl(40 96% 60%) 100%);
-    --accent-gradient: linear-gradient(135deg, hsl(183 82% 78%) 0%, hsl(186 82% 82%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(30 20% 6%) 0%, hsl(30 18% 10%) 100%);
+    --cta-gradient: linear-gradient(135deg, hsl(32 95% 52%) 0%, hsl(38 95% 55%) 100%);
+    --accent-gradient: linear-gradient(135deg, hsl(45 90% 60%) 0%, hsl(50 90% 65%) 100%);
+    --success-gradient: linear-gradient(135deg, hsl(160 60% 45%) 0%, hsl(165 60% 50%) 100%);
     
-    --shadow-soft: 0 4px 20px hsl(32 15% 4% / 0.3);
-    --shadow-glow: 0 0 30px hsl(37 96% 55% / 0.2);
-    --shadow-card: 0 8px 32px hsl(32 15% 4% / 0.4);
+    --shadow-soft: 0 4px 20px hsl(30 20% 3% / 0.4);
+    --shadow-glow: 0 0 40px hsl(32 95% 52% / 0.25);
+    --shadow-card: 0 12px 40px hsl(30 20% 3% / 0.5);
+    --shadow-primary: 0 8px 30px hsl(32 95% 52% / 0.3);
     
-    --radius: 0.75rem;
+    --radius: 0.875rem;
   }
 }
 
