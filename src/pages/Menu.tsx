@@ -1,229 +1,198 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, Grid, List, Plus } from "lucide-react";
-import biryaniImage from "@/assets/biryani-special.jpg";
-import avocadoToastImage from "@/assets/avocado-toast.jpg";
-import khichuriImage from "@/assets/khichuri-bowl.jpg";
+import { Star, Search, Plus, Coffee, UtensilsCrossed, Cookie, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+  image_url: string | null;
+  is_available: boolean | null;
+  is_featured: boolean | null;
+  stock: number | null;
+}
 
 const Menu = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  const menuItems = [
-    // Breakfast Items
-    { id: 1, name: "Paratha", description: "Traditional flatbread, freshly made", price: 10, image: khichuriImage, category: "breakfast", rating: 4.5, isPopular: true, per: "pc" },
-    { id: 2, name: "Vegetable Curry", description: "Fresh mixed vegetables in aromatic spices", price: 10, image: avocadoToastImage, category: "breakfast", rating: 4.3, isPopular: false },
-    { id: 3, name: "Lentil (Dal)", description: "Yellow lentils cooked to perfection", price: 10, image: khichuriImage, category: "breakfast", rating: 4.4, isPopular: false },
-    { id: 4, name: "Special Moong Dal", description: "Premium moong lentils with special spices", price: 20, image: khichuriImage, category: "breakfast", rating: 4.6, isPopular: true },
-    { id: 5, name: "Vuna Khichuri", description: "Traditional rice and lentil dish with pickle/mash", price: 30, image: khichuriImage, category: "breakfast", rating: 4.8, isPopular: true },
-    { id: 6, name: "Biryani (Half)", description: "Aromatic basmati rice with tender meat", price: 50, image: biryaniImage, category: "breakfast", rating: 4.9, isPopular: true, preOrder: true },
-    { id: 7, name: "Biryani (Full)", description: "Full portion of aromatic basmati rice with meat", price: 90, image: biryaniImage, category: "breakfast", rating: 4.9, isPopular: true, preOrder: true },
-    { id: 8, name: "Fried Egg", description: "Perfectly fried egg with golden yolk", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.2, isPopular: false },
-    { id: 9, name: "Omelet", description: "Fluffy omelet made with fresh eggs", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.3, isPopular: false },
-    { id: 10, name: "Boiled Egg", description: "Soft or hard boiled egg", price: 20, image: avocadoToastImage, category: "breakfast", rating: 4.1, isPopular: false },
-
-    // Snacks Items
-    { id: 11, name: "Singara", description: "Triangular pastry with savory filling", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.4, isPopular: true, per: "pc" },
-    { id: 12, name: "Samucha", description: "Crispy pastry with spiced potato filling", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.3, isPopular: true, per: "pc" },
-    { id: 13, name: "Egg Chop", description: "Fried egg wrapped in crispy coating", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.5, isPopular: false, per: "pc" },
-    { id: 14, name: "Puri", description: "Deep-fried bread, light and crispy", price: 10, image: avocadoToastImage, category: "snacks", rating: 4.2, isPopular: false, per: "pc" },
-    { id: 15, name: "Aloo Chop", description: "Spiced potato fritters", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.0, isPopular: true, per: "pc" },
-    { id: 16, name: "Beguni", description: "Sliced eggplant in crispy batter", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.1, isPopular: false, per: "pc" },
-    { id: 17, name: "Pakora", description: "Mixed vegetable fritters", price: 5, image: avocadoToastImage, category: "snacks", rating: 4.2, isPopular: false, per: "pc" },
-
-    // Coffee & Tea Items
-    { id: 18, name: "Nescafé Sweet Coffee", description: "Premium instant coffee, perfectly sweetened", price: 30, image: khichuriImage, category: "cafe", rating: 4.5, isPopular: true },
-    { id: 19, name: "Nescafé Special Coffee", description: "Premium blend with special preparation", price: 40, image: khichuriImage, category: "cafe", rating: 4.7, isPopular: true },
-    { id: 20, name: "Sugar-Free Coffee", description: "Great taste without the sugar", price: 30, image: khichuriImage, category: "cafe", rating: 4.3, isPopular: false },
-    { id: 21, name: "Standard Coffee", description: "Classic coffee for everyday enjoyment", price: 20, image: khichuriImage, category: "cafe", rating: 4.1, isPopular: true },
-    { id: 22, name: "Black Coffee", description: "Pure coffee without milk or sugar", price: 30, image: khichuriImage, category: "cafe", rating: 4.4, isPopular: false },
-    { id: 23, name: "Green Tea", description: "Healthy and refreshing green tea", price: 15, image: khichuriImage, category: "cafe", rating: 4.2, isPopular: false },
-    { id: 24, name: "Milk Tea", description: "Traditional tea with milk", price: 10, image: khichuriImage, category: "cafe", rating: 4.3, isPopular: true },
-    { id: 25, name: "Special Milk Tea", description: "Premium milk tea with special blend", price: 20, image: khichuriImage, category: "cafe", rating: 4.6, isPopular: true },
-    { id: 26, name: "Masala Tea", description: "Spiced tea with aromatic herbs", price: 10, image: khichuriImage, category: "cafe", rating: 4.4, isPopular: true },
-    { id: 27, name: "Malai Tea", description: "Rich creamy tea with malai", price: 20, image: khichuriImage, category: "cafe", rating: 4.5, isPopular: false }
-  ];
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
-    { value: "all", label: "All Items" },
-    { value: "breakfast", label: "Breakfast 🍳" },
-    { value: "snacks", label: "Snacks 🥪" },
-    { value: "cafe", label: "Café ☕" },
+    { value: "all", label: "All", icon: Sparkles },
+    { value: "Breakfast", label: "Breakfast", icon: UtensilsCrossed },
+    { value: "Snacks", label: "Snacks", icon: Cookie },
+    { value: "Café", label: "Café", icon: Coffee },
   ];
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  const fetchMenuItems = async () => {
+    const { data, error } = await supabase
+      .from("menu_items")
+      .select("*")
+      .eq("is_available", true)
+      .order("category", { ascending: true });
+
+    if (error) {
+      toast.error("Failed to load menu");
+    } else {
+      setMenuItems(data || []);
+    }
+    setLoading(false);
+  };
 
   const filteredItems = menuItems.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  return (
-    <div className="min-h-screen py-8 container-padding">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-gradient">Our Menu</h1>
-          <p className="text-muted-foreground">Fresh, delicious food made with love</p>
-        </div>
+  const getCategoryCount = (category: string) => {
+    if (category === "all") return menuItems.length;
+    return menuItems.filter(item => item.category === category).length;
+  };
 
-        {/* Search and Filters */}
-        <div className="space-y-4 mb-8">
-          <div className="relative">
+  return (
+    <div className="min-h-screen bg-background pb-24">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border/50">
+        <div className="px-4 py-3">
+          {/* Search Bar */}
+          <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
-              placeholder="Search for dishes..."
+              placeholder="Search dishes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-input border-border"
+              className="pl-10 bg-muted/50 border-0 h-10 rounded-xl text-sm"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex gap-4 w-full sm:w-auto">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-48 bg-input border-border">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className="px-3"
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="px-3"
-              >
-                <List className="w-4 h-4" />
-              </Button>
-            </div>
+          {/* Category Pills */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const isActive = selectedCategory === category.value;
+              return (
+                <motion.button
+                  key={category.value}
+                  onClick={() => setSelectedCategory(category.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  }`}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {category.label}
+                  <span className={`text-xs ${isActive ? "text-primary-foreground/80" : "text-muted-foreground/60"}`}>
+                    ({getCategoryCount(category.value)})
+                  </span>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Menu Items */}
-        <div className={`${
-          viewMode === "grid" 
-            ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" 
-            : "space-y-6"
-        }`}>
-          {filteredItems.map((item) => (
-            <Card key={item.id} className="food-card">
-              {viewMode === "grid" ? (
-                <>
-                  <div className="aspect-square overflow-hidden relative">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {item.isPopular && (
-                      <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">
-                        Popular
-                      </Badge>
-                    )}
-                    {item.preOrder && (
-                      <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
-                        Pre-order
-                      </Badge>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary" className="capitalize">
-                        {item.category}
-                      </Badge>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-primary fill-current" />
-                        <span className="text-sm">{item.rating}</span>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {item.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-primary">
-                        {item.price} tk{item.per && `/${item.per}`}
-                      </span>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add
-                      </Button>
-                    </div>
-                  </CardContent>
-                </>
-              ) : (
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 overflow-hidden rounded-lg relative flex-shrink-0">
-                      <img 
-                        src={item.image} 
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="capitalize text-xs">
-                          {item.category}
-                        </Badge>
-                        {item.isPopular && (
-                          <Badge className="bg-destructive text-destructive-foreground text-xs">
-                            Popular
-                          </Badge>
-                        )}
-                        <div className="flex items-center space-x-1 ml-auto">
-                          <Star className="w-4 h-4 text-primary fill-current" />
-                          <span className="text-sm">{item.rating}</span>
+      {/* Menu Grid */}
+      <div className="px-4 py-4">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-muted/50 rounded-2xl h-52 animate-pulse" />
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">No items found</p>
+          </div>
+        ) : (
+          <motion.div 
+            className="grid grid-cols-2 gap-3"
+            layout
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: index * 0.03 }}
+                >
+                  <Card className="overflow-hidden border-0 bg-card shadow-sm hover:shadow-md transition-shadow rounded-2xl">
+                    {/* Image */}
+                    <div className="aspect-square relative overflow-hidden bg-muted">
+                      {item.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                          <UtensilsCrossed className="w-8 h-8 text-primary/30" />
                         </div>
-                      </div>
-                      <h3 className="text-lg font-semibold mb-1">{item.name}</h3>
-                      <p className="text-muted-foreground text-sm mb-3">
-                        {item.description}
+                      )}
+                      
+                      {/* Featured Badge */}
+                      {item.is_featured && (
+                        <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5">
+                          ⭐ Popular
+                        </Badge>
+                      )}
+
+                      {/* Out of Stock */}
+                      {item.stock !== null && item.stock <= 0 && (
+                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                          <span className="text-sm font-medium text-destructive">Out of Stock</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <CardContent className="p-3">
+                      <h3 className="font-semibold text-sm line-clamp-1 text-foreground">
+                        {item.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                        {item.description || item.category}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-primary">
-                          {item.price} tk{item.per && `/${item.per}`}
+                      
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-base font-bold text-primary">
+                          ৳{item.price}
                         </span>
-                        <Button size="sm" className="bg-primary hover:bg-primary/90">
-                          <Plus className="w-3 h-3 mr-1" />
-                          Add
+                        <Button 
+                          size="sm" 
+                          className="h-7 w-7 p-0 rounded-full bg-primary hover:bg-primary/90"
+                          disabled={item.stock !== null && item.stock <= 0}
+                        >
+                          <Plus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
-
-        {filteredItems.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">No items found matching your search.</p>
-          </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
     </div>

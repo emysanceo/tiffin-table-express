@@ -58,6 +58,7 @@ export type Database = {
           is_featured: boolean | null
           name: string
           price: number
+          stock: number | null
           updated_at: string
         }
         Insert: {
@@ -70,6 +71,7 @@ export type Database = {
           is_featured?: boolean | null
           name: string
           price: number
+          stock?: number | null
           updated_at?: string
         }
         Update: {
@@ -82,6 +84,7 @@ export type Database = {
           is_featured?: boolean | null
           name?: string
           price?: number
+          stock?: number | null
           updated_at?: string
         }
         Relationships: []
