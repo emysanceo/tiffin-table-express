@@ -4,9 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Search, Plus, Coffee, UtensilsCrossed, Cookie, Sparkles } from "lucide-react";
+import { Search, Plus, Coffee, UtensilsCrossed, Cookie, Sparkles, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
 
 interface MenuItem {
   id: string;
@@ -25,6 +26,8 @@ const Menu = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
+  const { addItem } = useCart();
 
   const categories = [
     { value: "all", label: "All", icon: Sparkles },
@@ -58,6 +61,26 @@ const Menu = () => {
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleAddToCart = (item: MenuItem) => {
+    addItem({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image_url: item.image_url,
+    });
+    setAddedItems(prev => new Set(prev).add(item.id));
+    toast.success(`${item.name} added to cart`);
+    
+    // Reset the added state after animation
+    setTimeout(() => {
+      setAddedItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
+    }, 1500);
+  };
 
   const getCategoryCount = (category: string) => {
     if (category === "all") return menuItems.length;
@@ -183,8 +206,29 @@ const Menu = () => {
                           size="sm" 
                           className="h-7 w-7 p-0 rounded-full bg-primary hover:bg-primary/90"
                           disabled={item.stock !== null && item.stock <= 0}
+                          onClick={() => handleAddToCart(item)}
                         >
-                          <Plus className="w-4 h-4" />
+                          <AnimatePresence mode="wait">
+                            {addedItems.has(item.id) ? (
+                              <motion.div
+                                key="check"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0 }}
+                              >
+                                <Check className="w-4 h-4" />
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                key="plus"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0 }}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </Button>
                       </div>
                     </CardContent>
