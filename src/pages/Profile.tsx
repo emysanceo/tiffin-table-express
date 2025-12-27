@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,252 +16,213 @@ import {
   Edit,
   Star,
   Award,
-  ShoppingBag
+  ShoppingBag,
+  Shield,
+  Loader2
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface UserProfile {
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+}
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const { user, loading, signOut, isAdmin } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, phone, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+    
+    setProfile(data);
+    setLoadingProfile(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  if (loading || loadingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   const userStats = [
-    { label: "Total Orders", value: "24", icon: ShoppingBag },
-    { label: "Favorite Items", value: "8", icon: Star },
-    { label: "Points Earned", value: "1,240", icon: Award },
+    { label: "Total Orders", value: "0", icon: ShoppingBag },
+    { label: "Favorite Items", value: "0", icon: Star },
+    { label: "Points Earned", value: "0", icon: Award },
   ];
 
-  const savedAddresses = [
-    {
-      id: 1,
-      type: "Home",
-      address: "123 MG Road, Bangalore, Karnataka 560001",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "Office",
-      address: "Tech Park, Electronic City, Bangalore 560100",
-      isDefault: false,
-    },
-  ];
-
-  const paymentMethods = [
-    {
-      id: 1,
-      type: "UPI",
-      details: "priya@paytm",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "Card",
-      details: "**** **** **** 1234",
-      isDefault: false,
-    },
-  ];
+  const getInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    }
+    return user.email?.slice(0, 2).toUpperCase() || "U";
+  };
 
   return (
-    <div className="min-h-screen py-8 container-padding">
+    <div className="min-h-screen py-6 px-4 pb-24">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-gradient">Profile</h1>
-          <p className="text-muted-foreground">Manage your account and preferences</p>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1 text-foreground">Profile</h1>
+          <p className="text-muted-foreground text-sm">Manage your account</p>
         </div>
 
         {/* User Info Card */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground text-2xl font-bold">PS</span>
+        <Card className="mb-6 border-border/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground text-xl font-bold">{getInitials()}</span>
               </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-semibold mb-1">Priya Sharma</h2>
-                <p className="text-muted-foreground mb-2">priya.sharma@email.com</p>
-                <div className="flex items-center gap-4">
-                  <Badge className="bg-accent text-accent-foreground">
-                    Gold Member
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-semibold truncate">
+                  {profile?.full_name || "User"}
+                </h2>
+                <p className="text-muted-foreground text-sm truncate">{user.email}</p>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">
+                    Member
                   </Badge>
-                  <Badge variant="outline">
-                    ⭐ 4.8 Community Rating
-                  </Badge>
+                  {isAdmin && (
+                    <Badge className="bg-primary text-primary-foreground text-xs">
+                      <Shield className="w-3 h-3 mr-1" />
+                      Admin
+                    </Badge>
+                  )}
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
             </div>
           </CardContent>
         </Card>
 
+        {/* Admin Access */}
+        {isAdmin && (
+          <Card className="mb-6 border-primary/30 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Shield className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Admin Panel</p>
+                    <p className="text-xs text-muted-foreground">Manage menu, orders & users</p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => navigate("/admin")}>
+                  Open
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           {userStats.map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="p-6 text-center">
-                <stat.icon className="w-8 h-8 mx-auto text-primary mb-2" />
-                <p className="text-2xl font-bold mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <Card key={stat.label} className="border-border/50">
+              <CardContent className="p-3 text-center">
+                <stat.icon className="w-5 h-5 mx-auto text-primary mb-1" />
+                <p className="text-lg font-bold">{stat.value}</p>
+                <p className="text-[10px] text-muted-foreground">{stat.label}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="w-5 h-5 mr-2" />
-                Contact Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Contact Information */}
+        <Card className="mb-4 border-border/50">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base flex items-center">
+              <User className="w-4 h-4 mr-2" />
+              Account Info
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground">Email</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone className="w-4 h-4 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm">{profile?.phone || "Not set"}</p>
+                <p className="text-xs text-muted-foreground">Phone</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Settings */}
+        <Card className="border-border/50">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-3">
+            <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">priya.sharma@email.com</p>
-                  <p className="text-sm text-muted-foreground">Email address</p>
-                </div>
+                <Bell className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">Notifications</span>
               </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">+91 9876543210</p>
-                  <p className="text-sm text-muted-foreground">Phone number</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Update Contact Info
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Saved Addresses */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <MapPin className="w-5 h-5 mr-2" />
-                Saved Addresses
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {savedAddresses.map((address) => (
-                <div key={address.id} className="p-4 border border-border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={address.isDefault ? "default" : "secondary"}>
-                      {address.type}
-                    </Badge>
-                    {address.isDefault && (
-                      <Badge className="bg-accent text-accent-foreground text-xs">
-                        Default
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{address.address}</p>
-                </div>
-              ))}
-              <Button variant="outline" size="sm" className="w-full">
-                Add New Address
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Payment Methods */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CreditCard className="w-5 h-5 mr-2" />
-                Payment Methods
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {paymentMethods.map((method) => (
-                <div key={method.id} className="p-4 border border-border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={method.isDefault ? "default" : "secondary"}>
-                      {method.type}
-                    </Badge>
-                    {method.isDefault && (
-                      <Badge className="bg-accent text-accent-foreground text-xs">
-                        Default
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{method.details}</p>
-                </div>
-              ))}
-              <Button variant="outline" size="sm" className="w-full">
-                Add Payment Method
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-muted-foreground" />
-                  <span>Notifications</span>
-                </div>
-                <Button variant="outline" size="sm">
-                  Configure
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Globe className="w-4 h-4 text-muted-foreground" />
-                  <span>Language</span>
-                </div>
-                <Button variant="outline" size="sm">
-                  English
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Moon className="w-4 h-4 text-muted-foreground" />
-                  <span>Dark Mode</span>
-                </div>
-                <Button variant="outline" size="sm">
-                  Toggle
-                </Button>
-              </div>
-
-              <Separator />
-
-              <Button 
-                variant="outline" 
-                className="w-full text-destructive hover:text-destructive-foreground hover:bg-destructive"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Support Section */}
-        <Card className="mt-8">
-          <CardContent className="p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2">Need Help?</h3>
-            <p className="text-muted-foreground mb-4">
-              Contact our support team for any questions or issues
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="outline">
-                Help Center
-              </Button>
-              <Button variant="outline">
-                Contact Support
-              </Button>
-              <Button variant="outline">
-                Send Feedback
+              <Button variant="ghost" size="sm">
+                Configure
               </Button>
             </div>
+            
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-3">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">Language</span>
+              </div>
+              <Button variant="ghost" size="sm">
+                English
+              </Button>
+            </div>
+
+            <Separator />
+
+            <Button 
+              variant="outline" 
+              className="w-full text-destructive hover:text-destructive-foreground hover:bg-destructive"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </CardContent>
         </Card>
       </div>

@@ -20,9 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit2, Trash2, Search, Image, Package, AlertCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Image, Package, AlertCircle, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useRef } from "react";
 
 interface MenuItem {
   id: string;
@@ -55,6 +56,8 @@ const AdminMenu = () => {
   });
 
   const categories = ["Breakfast", "Snacks", "Café"];
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -72,6 +75,47 @@ const AdminMenu = () => {
       setItems(data || []);
     }
     setLoading(false);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("menu-images")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("menu-images")
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, image_url: publicUrl });
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -240,25 +284,56 @@ const AdminMenu = () => {
               </div>
 
               <div>
-                <Label>Image URL</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                    className="bg-input border-border/50"
+                <Label>Image</Label>
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
                   />
-                </div>
-                {formData.image_url && (
-                  <div className="mt-2 rounded-lg overflow-hidden w-20 h-20">
-                    <img 
-                      src={formData.image_url} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      placeholder="Image URL or upload"
+                      className="bg-input border-border/50 flex-1"
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                    </Button>
                   </div>
-                )}
+                  {formData.image_url && (
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 w-6 h-6"
+                        onClick={() => setFormData({ ...formData, image_url: "" })}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
