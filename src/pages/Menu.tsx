@@ -4,10 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Coffee, UtensilsCrossed, Cookie, Sparkles, Check } from "lucide-react";
+import { Search, Plus, Coffee, UtensilsCrossed, Cookie, Sparkles, Check, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MenuItem {
   id: string;
@@ -28,6 +30,8 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
   const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { user } = useAuth();
 
   const categories = [
     { value: "all", label: "All", icon: Sparkles },
@@ -72,7 +76,6 @@ const Menu = () => {
     setAddedItems(prev => new Set(prev).add(item.id));
     toast.success(`${item.name} added to cart`);
     
-    // Reset the added state after animation
     setTimeout(() => {
       setAddedItems(prev => {
         const newSet = new Set(prev);
@@ -88,7 +91,7 @@ const Menu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       {/* Sticky Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border/50">
         <div className="px-4 py-3">
@@ -105,7 +108,7 @@ const Menu = () => {
           </div>
 
           {/* Category Pills */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = selectedCategory === category.value;
@@ -113,10 +116,10 @@ const Menu = () => {
                 <motion.button
                   key={category.value}
                   onClick={() => setSelectedCategory(category.value)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
                     isActive
                       ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -133,11 +136,11 @@ const Menu = () => {
       </div>
 
       {/* Menu Grid */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 pb-24">
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-muted/50 rounded-2xl h-52 animate-pulse" />
+              <div key={i} className="bg-muted rounded-2xl h-52 animate-pulse" />
             ))}
           </div>
         ) : filteredItems.length === 0 ? (
@@ -173,6 +176,23 @@ const Menu = () => {
                           <UtensilsCrossed className="w-8 h-8 text-primary/30" />
                         </div>
                       )}
+                      
+                      {/* Favorite Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(item.id);
+                        }}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center transition-all"
+                      >
+                        <Heart 
+                          className={`w-4 h-4 transition-colors ${
+                            isFavorite(item.id) 
+                              ? "fill-destructive text-destructive" 
+                              : "text-foreground"
+                          }`} 
+                        />
+                      </button>
                       
                       {/* Featured Badge */}
                       {item.is_featured && (

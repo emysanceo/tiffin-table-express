@@ -11,9 +11,9 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden max-w-screen">
       <TopNavigation />
-      <main className="mobile-safe-bottom">
+      <main className="mobile-safe-bottom overflow-x-hidden">
         {children}
       </main>
       <BottomNavigation currentPath={location.pathname} />

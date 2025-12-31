@@ -8,7 +8,7 @@ import ReviewsCarousel from "@/components/ReviewsCarousel";
 
 const Home = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Hero Carousel */}
       <HeroCarousel />
 

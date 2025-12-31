@@ -20,11 +20,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
 
-  // Login form
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Signup form
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
@@ -114,9 +112,9 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="p-4">
+      <div className="p-4 safe-top">
         <Button
           variant="ghost"
           size="sm"
@@ -133,29 +131,29 @@ const Auth = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-sm"
         >
-          <Card className="border-border/50 shadow-xl">
+          <Card className="border-border/50 bg-card">
             <CardHeader className="text-center pb-2">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🍽️</span>
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl">🍽️</span>
               </div>
-              <CardTitle className="text-2xl">Tiffin Table</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl">Tiffin Table</CardTitle>
+              <CardDescription className="text-sm">
                 Sign in to order delicious food
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50">
+                  <TabsTrigger value="login" className="text-sm">Login</TabsTrigger>
+                  <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
+                  <form onSubmit={handleLogin} className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="login-email" className="text-sm">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -164,13 +162,13 @@ const Auth = () => {
                           placeholder="you@example.com"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password">Password</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="login-password" className="text-sm">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -179,14 +177,14 @@ const Auth = () => {
                           placeholder="••••••••"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-10 mt-2"
                       disabled={loading}
                     >
                       {loading ? (
@@ -199,9 +197,9 @@ const Auth = () => {
                 </TabsContent>
 
                 <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
+                  <form onSubmit={handleSignup} className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-name" className="text-sm">Full Name</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -210,13 +208,13 @@ const Auth = () => {
                           placeholder="John Doe"
                           value={signupName}
                           onChange={(e) => setSignupName(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-email" className="text-sm">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -225,13 +223,13 @@ const Auth = () => {
                           placeholder="you@example.com"
                           value={signupEmail}
                           onChange={(e) => setSignupEmail(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-password" className="text-sm">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -240,13 +238,13 @@ const Auth = () => {
                           placeholder="••••••••"
                           value={signupPassword}
                           onChange={(e) => setSignupPassword(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-confirm">Confirm Password</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-confirm" className="text-sm">Confirm Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
@@ -255,14 +253,14 @@ const Auth = () => {
                           placeholder="••••••••"
                           value={signupConfirmPassword}
                           onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                          className="pl-10"
+                          className="pl-10 h-10 bg-muted/50 border-border/50"
                           required
                         />
                       </div>
                     </div>
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-10 mt-2"
                       disabled={loading}
                     >
                       {loading ? (
