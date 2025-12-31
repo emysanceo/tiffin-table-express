@@ -3,17 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { 
   User, 
   Mail, 
   Phone, 
-  MapPin, 
-  CreditCard, 
   Bell, 
   Globe, 
-  Moon, 
   LogOut,
-  Edit,
   Star,
   Award,
   ShoppingBag,
@@ -21,8 +18,10 @@ import {
   Loader2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface UserProfile {
   full_name: string | null;
@@ -33,8 +32,11 @@ interface UserProfile {
 const Profile = () => {
   const navigate = useNavigate();
   const { user, loading, signOut, isAdmin } = useAuth();
+  const { favorites } = useFavorites();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [orderCount, setOrderCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -45,6 +47,8 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchOrderCount();
+      checkNotificationPermission();
     }
   }, [user]);
 
@@ -61,6 +65,49 @@ const Profile = () => {
     setLoadingProfile(false);
   };
 
+  const fetchOrderCount = async () => {
+    if (!user) return;
+    
+    const { count } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    
+    setOrderCount(count || 0);
+  };
+
+  const checkNotificationPermission = () => {
+    if ("Notification" in window) {
+      setNotificationsEnabled(Notification.permission === "granted");
+    }
+  };
+
+  const toggleNotifications = async () => {
+    if (!("Notification" in window)) {
+      toast.error("Notifications not supported");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      setNotificationsEnabled(false);
+      toast.info("Notifications disabled");
+    } else {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        setNotificationsEnabled(true);
+        toast.success("Notifications enabled!");
+        
+        // Show a test notification
+        new Notification("Tiffin Table", {
+          body: "You'll receive order updates here!",
+          icon: "/favicon.ico"
+        });
+      } else {
+        toast.error("Please enable notifications in browser settings");
+      }
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -68,7 +115,7 @@ const Profile = () => {
 
   if (loading || loadingProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -79,9 +126,9 @@ const Profile = () => {
   }
 
   const userStats = [
-    { label: "Total Orders", value: "0", icon: ShoppingBag },
-    { label: "Favorite Items", value: "0", icon: Star },
-    { label: "Points Earned", value: "0", icon: Award },
+    { label: "Orders", value: orderCount.toString(), icon: ShoppingBag },
+    { label: "Favorites", value: favorites.length.toString(), icon: Star },
+    { label: "Points", value: "0", icon: Award },
   ];
 
   const getInitials = () => {
@@ -92,27 +139,27 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen py-6 px-4 pb-24">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-1 text-foreground">Profile</h1>
-          <p className="text-muted-foreground text-sm">Manage your account</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="px-4 py-4">
+        <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+        <p className="text-sm text-muted-foreground">Manage your account</p>
+      </div>
 
+      <div className="px-4 pb-24 space-y-4">
         {/* User Info Card */}
-        <Card className="mb-6 border-border/50">
+        <Card className="border-border/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-primary-foreground text-xl font-bold">{getInitials()}</span>
+              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground text-lg font-bold">{getInitials()}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold truncate">
+                <h2 className="font-semibold truncate">
                   {profile?.full_name || "User"}
                 </h2>
-                <p className="text-muted-foreground text-sm truncate">{user.email}</p>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <Badge variant="secondary" className="text-xs">
                     Member
                   </Badge>
@@ -130,14 +177,14 @@ const Profile = () => {
 
         {/* Admin Access */}
         {isAdmin && (
-          <Card className="mb-6 border-primary/30 bg-primary/5">
+          <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Shield className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="font-medium">Admin Panel</p>
-                    <p className="text-xs text-muted-foreground">Manage menu, orders & users</p>
+                    <p className="font-medium text-sm">Admin Panel</p>
+                    <p className="text-xs text-muted-foreground">Manage menu & orders</p>
                   </div>
                 </div>
                 <Button size="sm" onClick={() => navigate("/admin")}>
@@ -149,7 +196,7 @@ const Profile = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3">
           {userStats.map((stat) => (
             <Card key={stat.label} className="border-border/50">
               <CardContent className="p-3 text-center">
@@ -161,24 +208,24 @@ const Profile = () => {
           ))}
         </div>
 
-        {/* Contact Information */}
-        <Card className="mb-4 border-border/50">
+        {/* Account Info */}
+        <Card className="border-border/50">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base flex items-center">
-              <User className="w-4 h-4 mr-2" />
+            <CardTitle className="text-sm flex items-center gap-2">
+              <User className="w-4 h-4" />
               Account Info
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-muted-foreground" />
+              <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-sm truncate">{user.email}</p>
                 <p className="text-xs text-muted-foreground">Email</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-muted-foreground" />
+              <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-sm">{profile?.phone || "Not set"}</p>
                 <p className="text-xs text-muted-foreground">Phone</p>
@@ -190,17 +237,21 @@ const Profile = () => {
         {/* Settings */}
         <Card className="border-border/50">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-base">Settings</CardTitle>
+            <CardTitle className="text-sm">Settings</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-3">
                 <Bell className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">Notifications</span>
+                <div>
+                  <span className="text-sm">Notifications</span>
+                  <p className="text-xs text-muted-foreground">Order updates</p>
+                </div>
               </div>
-              <Button variant="ghost" size="sm">
-                Configure
-              </Button>
+              <Switch 
+                checked={notificationsEnabled} 
+                onCheckedChange={toggleNotifications}
+              />
             </div>
             
             <div className="flex items-center justify-between py-2">
@@ -208,7 +259,7 @@ const Profile = () => {
                 <Globe className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">Language</span>
               </div>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-xs">
                 English
               </Button>
             </div>
