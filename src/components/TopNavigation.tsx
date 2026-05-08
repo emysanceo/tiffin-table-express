@@ -17,10 +17,10 @@ const TopNavigation = () => {
         <div className="container-padding h-14 flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-white rounded-full pl-1 pr-3 py-1 shadow-sm"
             aria-label="Spizery Tiffin Table home"
           >
-            <img src={logo} alt="Spizery Tiffin Table" className="h-9 w-auto object-contain" />
+            <img src={logo} alt="Spizery Tiffin Table" className="h-7 w-auto object-contain" />
           </button>
           
           <div className="flex items-center gap-1">
