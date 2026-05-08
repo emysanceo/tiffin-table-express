@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import GlobalSearch from "./GlobalSearch";
+import logo from "@/assets/spizery-logo.png";
 
 const TopNavigation = () => {
   const navigate = useNavigate();
@@ -14,12 +15,13 @@ const TopNavigation = () => {
     <>
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-xl border-b border-border/30">
         <div className="container-padding h-14 flex items-center justify-between">
-          <div 
-            className="text-lg font-bold text-gradient cursor-pointer" 
+          <button
             onClick={() => navigate("/")}
+            className="flex items-center gap-2"
+            aria-label="Spizery Tiffin Table home"
           >
-            Tiffin Table
-          </div>
+            <img src={logo} alt="Spizery Tiffin Table" className="h-9 w-auto object-contain" />
+          </button>
           
           <div className="flex items-center gap-1">
             <Button 
