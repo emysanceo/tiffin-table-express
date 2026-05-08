@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import ProfileEdit from "@/components/ProfileEdit";
 import { 
   User, 
   Mail, 
@@ -151,8 +152,16 @@ const Profile = () => {
         <Card className="border-border/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-primary-foreground text-lg font-bold">{getInitials()}</span>
+              <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-primary flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-primary-foreground text-lg font-bold">{getInitials()}</span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="font-semibold truncate">
@@ -171,6 +180,11 @@ const Profile = () => {
                   )}
                 </div>
               </div>
+              <ProfileEdit
+                userId={user.id}
+                currentProfile={profile}
+                onProfileUpdate={fetchProfile}
+              />
             </div>
           </CardContent>
         </Card>
